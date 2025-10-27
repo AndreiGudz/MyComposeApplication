@@ -3,6 +3,7 @@ package com.example.mycomposeapplication
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -36,9 +39,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mycomposeapplication.ui.theme.MyComposeApplicationTheme
 import kotlinx.coroutines.delay
+
+/**
+ * Практическая работа №13.
+ * Тема: Компоненты Views
+ * 1. Вывести Hello world!;
+ * 2. Вывести 5 надписей по очереди, с паузой в 1 секунду;
+ * 3. Добавить кнопку. Менять надписи по нажатию кнопки;
+ * 4. Добавить кнопку с картинкой с тем же функционалом;
+ * 5. Поменять цвета у всех элементов;
+ * 6. Добавить картинку на задний фон;
+ * 7. Сделать опрос с несколькими вариантами ответа. Выводить правильно ли выбраны ответы или нет;
+ * 8. Сделать программу, которая эмулирует работу этой gif.
+ */
 
 val texts = listOf(
     "Первая надпись",
@@ -48,40 +66,52 @@ val texts = listOf(
     "Пятая надпись"
 )
 
+@Preview(showBackground = true)
+@Composable
+fun Practic13Preview() {
+    MyComposeApplicationTheme {
+        Practic13Content()
+    }
+}
+
 @Composable
 fun Practic13Content() {
-    var textState by remember { mutableStateOf("Hello World!") }
+    Box(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
+        var textState by remember { mutableStateOf("Hello World!") }
 
-    Image(
-        painter = painterResource(R.drawable.background_img),
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Crop,
-        contentDescription = "Фон"
-    )
-
-    Column {
-        Text(
-            text = textState,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1976D2)
+        Image(
+            painter = painterResource(R.drawable.background_img),
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            contentDescription = "Фон"
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Column {
+            Text(
+                text = textState,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1976D2)
+            )
 
-        AddWithDelayTexts()
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+            AddWithDelayTexts()
 
-        RowWithButtons { str -> { textState = str } }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+            RowWithButtons { str -> { textState = str } }
 
-        Questions()
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Questions()
 
-        SwitchesFromGif()
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SwitchesFromGif()
+        }
     }
 }
 
@@ -153,6 +183,13 @@ fun Questions() {
         )
         val correctAnswers = listOf(true, false, true)
 
+        val onCheckChangeCreator = { index: Int ->
+            { newState: Boolean ->
+                answersState[index] = newState
+                showResults = false
+            }
+        }
+
         questions.forEachIndexed { index, question ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -160,13 +197,13 @@ fun Questions() {
                     .fillMaxWidth()
                     .toggleable(
                         value = answersState[index],
-                        onValueChange = { answersState[index] = it }
+                        onValueChange = onCheckChangeCreator(index)
                     )
                     .padding(start = 8.dp)
             ) {
                 Checkbox(
                     checked = answersState[index],
-                    onCheckedChange = { answersState[index] = it },
+                    onCheckedChange = onCheckChangeCreator(index),
                     colors = CheckboxDefaults.colors(
                         checkedColor = Color(0xFF1976D2)
                     )
@@ -197,7 +234,7 @@ fun Questions() {
                 text = if (isCorrect) "✅ Все ответы правильные!" else "❌ Есть ошибки в ответах",
                 fontSize = 16.sp,
                 color = if (isCorrect) Color(0xFF388E3C) else Color(0xFFD32F2F),
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         }
     }
@@ -206,6 +243,7 @@ fun Questions() {
 @Composable
 fun SwitchesFromGif() {
     val switchesState = remember { mutableStateListOf(false, false, false) }
+
     Column {
         switchesState.forEachIndexed { index, isChecked ->
             Row(

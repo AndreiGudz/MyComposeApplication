@@ -1,18 +1,32 @@
 package com.example.mycomposeapplication
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.mycomposeapplication.ui.theme.MyComposeApplicationTheme
 
@@ -71,12 +85,42 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            MyComposeApplicationTheme {
-                Scaffold( modifier = Modifier.fillMaxSize() ) { innerPadding ->
-                    Box(modifier = Modifier.padding(innerPadding)) {
-                        Practic13Content()
+        setContent { MyContent() }
+    }
+}
+
+var globalPage = 13
+@Composable
+fun MyContent() {
+    var page: Int by remember { mutableIntStateOf(globalPage) }
+
+    MyComposeApplicationTheme {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            bottomBar = {
+                Navigation(13, 4) { pageIndex ->
+                    {
+                        page = 13 + pageIndex
+                        globalPage = page
                     }
+                }
+            }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                .padding(innerPadding)
+            ) {
+                when (page) {
+                    13 -> Practic13Content()
+                    14 -> Practic14Content()
+                    15 ->
+                        Toast.makeText(
+                            LocalContext.current,
+                            "Различные контейнеры были использованы в других фрагментах",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    16 -> Practic16Content()
+                    else -> Practic13Content()
                 }
             }
         }
@@ -84,16 +128,27 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Navigation() {
-    val repeatTimes = 3
-    val onClickListener =  {}
-
+fun Navigation(
+    startNumber: Int = 13,
+    repeatTimes: Int = 4,
+    modifier: Modifier = Modifier,
+    onClickListenerCreator: (Int) -> () -> Unit
+) {
     Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color(0xFF8BC34A)),
+        horizontalArrangement = Arrangement.SpaceAround,
     ) {
         repeat(repeatTimes) { repeatIndex ->
-            Button(onClick = onClickListener) {
-
-                Text(text = "Задание ${13 + repeatIndex}")
+            val onClickListener = onClickListenerCreator(repeatIndex)
+            Button(
+                onClick = onClickListener,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF2196F3)
+                )
+            ) {
+                Text(text = "№ ${startNumber + repeatIndex}")
             }
         }
     }
@@ -101,8 +156,8 @@ fun Navigation() {
 
 @Preview(showBackground = true)
 @Composable
-fun Preview() {
+fun NavigationPreview() {
     MyComposeApplicationTheme {
-        Practic13Content()
+        MyContent()
     }
 }

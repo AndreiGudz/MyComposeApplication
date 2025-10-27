@@ -3,11 +3,12 @@ package com.example.mycomposeapplication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -49,85 +50,18 @@ fun Practic16Content() {
 
         // 2. Создать циклом 10 TextView с текстом (от 0 до 9)
         item {
-            Text(
-                text = "2. 10 текстовых элементов циклом:",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = Color(0xFF1976D2)
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFE8F5E8), RoundedCornerShape(8.dp))
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                // Создаем 10 Text элементов циклом
-                repeat(10) { number ->
-                    Text(
-                        text = number.toString(),
-                        modifier = Modifier
-                            .background(Color(0xFFC8E6C9), RoundedCornerShape(4.dp))
-                            .padding(8.dp),
-                        fontSize = 16.sp,
-                        color = Color(0xFF1B5E20),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+            TenTexts()
         }
 
         // 3. Создать 10 кнопок
         item {
-            Text(
-                text = "3. 10 кнопок циклом:",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = Color(0xFF1976D2)
-            )
-            var lastPressedButton by remember { mutableStateOf(-1) }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFFFF3E0), RoundedCornerShape(8.dp))
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Создаем 10 кнопок циклом
-                repeat(10) { index ->
-                    Button(
-                        onClick = { lastPressedButton = index },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (lastPressedButton == index)
-                                Color(0xFFFF9800)
-                            else
-                                Color(0xFF2196F3)
-                        )
-                    ) {
-                        Text(text = "Кнопка ${index + 1}")
-                    }
-                }
-
-                if (lastPressedButton != -1) {
-                    Text(
-                        text = "Нажата кнопка: ${lastPressedButton + 1}",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFFFFE0B2), RoundedCornerShape(4.dp))
-                            .padding(8.dp),
-                        textAlign = TextAlign.Center,
-                        color = Color(0xFFE65100)
-                    )
-                }
-            }
+            TenButtons()
         }
 
         // 4. Создать калькулятор из кнопок (при помощи GridLayout)
         item {
             Text(
-                text = "4. Калькулятор (GridLayout аналог):",
+                text = "4. Калькулятор (LazyVerticalGrid):",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 color = Color(0xFF1976D2)
@@ -165,6 +99,83 @@ fun Practic16Content() {
     }
 }
 
+@Composable
+private fun TenTexts() {
+    Text(
+        text = "2. 10 текстовых элементов циклом:",
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
+        color = Color(0xFF1976D2)
+    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFE8F5E8), RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        // Создаем 10 Text элементов циклом
+        repeat(10) { number ->
+            Text(
+                text = number.toString(),
+                modifier = Modifier
+                    .background(Color(0xFFC8E6C9), RoundedCornerShape(4.dp))
+                    .padding(8.dp),
+                fontSize = 16.sp,
+                color = Color(0xFF1B5E20),
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun TenButtons() {
+    Text(
+        text = "3. 10 кнопок циклом:",
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
+        color = Color(0xFF1976D2)
+    )
+    var lastPressedButton by remember { mutableIntStateOf(-1) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFFFF3E0), RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // Создаем 10 кнопок циклом
+        repeat(10) { index ->
+            Button(
+                onClick = { lastPressedButton = index },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (lastPressedButton == index)
+                        Color(0xFFFF9800)
+                    else
+                        Color(0xFF2196F3)
+                )
+            ) {
+                Text(text = "Кнопка ${index + 1}")
+            }
+        }
+
+        if (lastPressedButton != -1) {
+            Text(
+                text = "Нажата кнопка: ${lastPressedButton + 1}",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFFFE0B2), RoundedCornerShape(4.dp))
+                    .padding(8.dp),
+                textAlign = TextAlign.Center,
+                color = Color(0xFFE65100)
+            )
+        }
+    }
+}
+
 // 4. Калькулятор с GridLayout аналогом
 @Composable
 fun CalculatorGridLayout(
@@ -175,9 +186,35 @@ fun CalculatorGridLayout(
         "C", "±", "%", "/",
         "7", "8", "9", "×",
         "4", "5", "6", "-",
-        "1", "2", "3", "+",
-        "0", "", ".", "="
+        "1", "2", "3", "+"
     )
+
+    val lastLineButtons = listOf("0", ".", "=")
+
+    @Composable
+    fun buttonColors(buttonText: String): ButtonColors = ButtonDefaults.buttonColors(
+        containerColor = when (buttonText) {
+            "C", "±", "%" -> Color(0xFF9E9E9E)
+            "/", "×", "-", "+", "=" -> Color(0xFFFF9800)
+            else -> Color(0xFF2196F3)
+        }
+    )
+
+    @Composable
+    fun onClickReaction(buttonText: String): () -> Unit = {
+        when (buttonText) {
+            "C" -> onValueChange("0")
+            "=" -> calculateResult(currentValue, onValueChange)
+            else -> {
+                val newValue = if (currentValue == "0") {
+                    buttonText
+                } else {
+                    currentValue + buttonText
+                }
+                onValueChange(newValue)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -198,62 +235,55 @@ fun CalculatorGridLayout(
             fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Сетка кнопок 5x4
-        repeat(5) { row ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                repeat(4) { col ->
-                    val index = row * 4 + col
-                    if (index < buttons.size && buttons[index].isNotEmpty()) {
-                        val buttonText = buttons[index]
-                        val weight = if (buttonText == "0") 2f else 1f
-
-                        Button(
-                            onClick = {
-                                when (buttonText) {
-                                    "C" -> onValueChange("0")
-                                    "=" -> calculateResult(currentValue, onValueChange)
-                                    else -> {
-                                        val newValue = if (currentValue == "0") {
-                                            buttonText
-                                        } else {
-                                            currentValue + buttonText
-                                        }
-                                        onValueChange(newValue)
-                                    }
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(weight)
-                                .height(60.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = when (buttonText) {
-                                    "C", "±", "%" -> Color(0xFF9E9E9E)
-                                    "/", "×", "-", "+", "=" -> Color(0xFFFF9800)
-                                    else -> Color(0xFF2196F3)
-                                }
-                            )
-                        ) {
-                            Text(
-                                text = buttonText,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
-                    } else {
-                        // Пустая ячейка для "0" которая занимает 2 колонки
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+            modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            items(buttons) { buttonText ->
+                Button(
+                    onClick = onClickReaction(buttonText),
+                    modifier = Modifier
+                        .height(60.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = buttonColors(buttonText)
+                ) {
+                    Text(
+                        text = buttonText,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                 }
             }
-            if (row < 4) Spacer(modifier = Modifier.height(4.dp))
         }
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            lastLineButtons.forEach { buttonText ->
+                // 2.05 для компнсации 4 dp расстояния между кнопками для строчки выше
+                val weight = if (buttonText == "0") 2.05f else 1f
+                Button(
+                    onClick = onClickReaction(buttonText),
+                    modifier = Modifier
+                        .weight(weight)
+                        .height(60.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = buttonColors(buttonText)
+                ) {
+                    Text(
+                        text = buttonText,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
@@ -265,6 +295,15 @@ fun CalculatorLoopLayout(
 ) {
     val numberButtons = listOf("7", "8", "9", "4", "5", "6", "1", "2", "3", "0")
     val operationButtons = listOf("+", "-", "×", "/", "=", "C")
+
+    fun onClickReaction(index: Int): () -> Unit = {
+        val newValue = if (currentValue == "0") {
+            numberButtons[index]
+        } else {
+            currentValue + numberButtons[index]
+        }
+        onValueChange(newValue)
+    }
 
     Column(
         modifier = Modifier
@@ -304,14 +343,7 @@ fun CalculatorLoopLayout(
                             if (index < numberButtons.size - 1) {
                                 CalculatorButton(
                                     text = numberButtons[index],
-                                    onClick = {
-                                        val newValue = if (currentValue == "0") {
-                                            numberButtons[index]
-                                        } else {
-                                            currentValue + numberButtons[index]
-                                        }
-                                        onValueChange(newValue)
-                                    },
+                                    onClick = onClickReaction(index),
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -322,14 +354,7 @@ fun CalculatorLoopLayout(
                 Row {
                     CalculatorButton(
                         text = "0",
-                        onClick = {
-                            val newValue = if (currentValue == "0") {
-                                "0"
-                            } else {
-                                currentValue + "0"
-                            }
-                            onValueChange(newValue)
-                        },
+                        onClick = onClickReaction(numberButtons.lastIndex),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -397,8 +422,7 @@ fun CalculatorButton(
 fun StyledElements() {
     val colors = listOf(
         Color(0xFFF44336), Color(0xFFE91E63), Color(0xFF9C27B0), Color(0xFF673AB7),
-        Color(0xFF3F51B5), Color(0xFF2196F3), Color(0xFF03A9F4), Color(0xFF00BCD4),
-        Color(0xFF009688), Color(0xFF4CAF50), Color(0xFF8BC34A), Color(0xFFCDDC39)
+        Color(0xFF3F51B5), Color(0xFF2196F3), Color(0xFF03A9F4), Color(0xFF00BCD4)
     )
 
     val styles = listOf(
@@ -464,7 +488,7 @@ fun StyledElements() {
                         else -> RoundedCornerShape(50)
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colors[index + 8]
+                        containerColor = colors[index + 4]
                     )
                 ) {
                     Text(
@@ -512,7 +536,7 @@ private fun calculateResult(expression: String, onResult: (String) -> Unit) {
     }
 }
 
-//@Preview(showBackground = true)
+@Preview(showBackground = true)
 @Composable
 fun Practic16Preview() {
     MyComposeApplicationTheme {

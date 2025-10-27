@@ -76,9 +76,7 @@ fun Practic13Preview() {
 
 @Composable
 fun Practic13Content() {
-    Box(
-        modifier = Modifier.verticalScroll(rememberScrollState())
-    ) {
+    Box {
         var textState by remember { mutableStateOf("Hello World!") }
 
         Image(
@@ -98,7 +96,7 @@ fun Practic13Content() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            AddWithDelayTexts()
+            TextsWithDelay()
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -279,7 +277,7 @@ fun SwitchesFromGif() {
 }
 
 @Composable
-fun AddWithDelayTexts() {
+fun TextsWithDelay() {
     Column(
         modifier = Modifier.background(Color.Red)
     ) {

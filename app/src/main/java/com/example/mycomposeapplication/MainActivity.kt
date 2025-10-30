@@ -14,8 +14,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
 import com.example.mycomposeapplication.ui.theme.MyComposeApplicationTheme
 
+// сущности из пр #5 - 3. Животное, Кошка, Собака;
+// интерфейсы - IMoveble, ITalkative, ICanBePrepared
 
 class MainActivity : ComponentActivity() {
 

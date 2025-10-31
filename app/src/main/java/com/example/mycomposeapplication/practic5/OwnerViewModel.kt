@@ -1,0 +1,65 @@
+package com.example.mycomposeapplication.practic5
+
+import android.app.Application
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.CreationExtras
+import kotlin.reflect.KClass
+
+class OwnerViewModelFactory(val application: Application) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return OwnerViewModel(application) as T
+    }
+}
+
+class OwnerViewModel(application: Application) : ViewModel() {
+
+    val ownersList: LiveData<List<Owner>>
+    private val repository: OwnerRepository
+    var ownerName by mutableStateOf("")
+    var ownerPhone: String by mutableStateOf("")
+    var ownerEmail: String by mutableStateOf("")
+
+
+    init {
+        val myDb = MyDatabase.getInstance(application)
+        val ownerDao = myDb.ownerDao()
+        repository = OwnerRepository(ownerDao)
+        ownersList = repository.ownerList
+    }
+
+    fun changeName(value: String){
+        ownerName = value
+    }
+
+    fun changePhone(value: String){
+        ownerPhone = value
+    }
+
+    fun changeEmail(value: String){
+        ownerEmail = value
+    }
+
+    fun addOwner() {
+        repository.addOwner(
+            Owner(
+                name = ownerName,
+                phone = ownerPhone,
+                email = ownerEmail
+            )
+        )
+    }
+
+    fun deleteOwner(id: Long) {
+        repository.deleteOwner(id)
+    }
+
+    fun updateOwner(id: Long) {
+        repository.updateOwner(id, ownerName, ownerPhone, ownerEmail)
+    }
+}

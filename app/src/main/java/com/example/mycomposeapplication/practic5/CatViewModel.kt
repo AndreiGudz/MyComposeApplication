@@ -1,0 +1,105 @@
+package com.example.mycomposeapplication.practic5
+
+import android.app.Application
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+
+class CatViewModelFactory(val application: Application) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return CatViewModel(application) as T
+    }
+}
+
+class CatViewModel(application: Application) : ViewModel() {
+
+    val catsList: LiveData<List<Cat>>
+    private val repository: CatRepository
+
+    // Состояние для формы добавления/редактирования
+    var catName by mutableStateOf("")
+    var catBreed by mutableStateOf("")
+    var catAge by mutableStateOf("")
+    var likeCatnip by mutableStateOf(false)
+    var catOwnerId by mutableStateOf("")
+
+    init {
+        val myDb = MyDatabase.getInstance(application)
+        val catDao = myDb.catDao()
+        repository = CatRepository(catDao)
+        catsList = repository.catList
+    }
+
+    fun changeName(value: String) {
+        catName = value
+    }
+
+    fun changeBreed(value: String) {
+        catBreed = value
+    }
+
+    fun changeAge(value: String) {
+        catAge = value
+    }
+
+    fun changeLikeCatnip(value: Boolean) {
+        likeCatnip = value
+    }
+
+    fun changeOwnerId(value: String) {
+        catOwnerId = value
+    }
+
+    fun addCat() {
+        val age = catAge.toIntOrNull() ?: 0
+        val ownerId = catOwnerId.toLongOrNull()
+
+        repository.addCat(
+            Cat(
+                name = catName,
+                breed = catBreed,
+                age = age,
+                likeCatnip = likeCatnip,
+                ownerId = ownerId
+            )
+        )
+
+        // Очистка формы после добавления
+        clearForm()
+    }
+
+    fun deleteCat(id: Long) {
+        repository.deleteCat(id)
+    }
+
+    fun updateCat(id: Long) {
+        val age = catAge.toIntOrNull() ?: 0
+
+        repository.updateCat(
+            id = id,
+            name = catName,
+            breed = catBreed,
+            age = age,
+            likeCatnip = likeCatnip
+        )
+
+        // Очистка формы после обновления
+        clearForm()
+    }
+
+    fun updateCatOwner(catId: Long) {
+        val ownerId = catOwnerId.toLongOrNull() ?: return
+        repository.updateCatOwner(catId, ownerId)
+    }
+
+    private fun clearForm() {
+        catName = ""
+        catBreed = ""
+        catAge = ""
+        likeCatnip = false
+        catOwnerId = ""
+    }
+}

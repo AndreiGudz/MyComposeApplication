@@ -21,6 +21,8 @@ class OwnerViewModel(application: Application) : ViewModel() {
 
     val ownersList: LiveData<List<Owner>>
     private val repository: OwnerRepository
+
+    var editingOwnerId by mutableStateOf<Long?>(null)
     var ownerName by mutableStateOf("")
     var ownerPhone: String by mutableStateOf("")
     var ownerEmail: String by mutableStateOf("")
@@ -61,5 +63,25 @@ class OwnerViewModel(application: Application) : ViewModel() {
 
     fun updateOwner(id: Long) {
         repository.updateOwner(id, ownerName, ownerPhone, ownerEmail)
+        cancelEditing()
+    }
+
+    fun startEditing(owner: Owner) {
+        editingOwnerId = owner.id
+        ownerName = owner.name
+        ownerPhone = owner.phone
+        ownerEmail = owner.email
+    }
+
+    fun cancelEditing() {
+        editingOwnerId = null
+        clearForm()
+    }
+
+    private fun clearForm() {
+        ownerName = ""
+        ownerPhone = ""
+        ownerEmail = ""
+        editingOwnerId = null
     }
 }

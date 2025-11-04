@@ -28,6 +28,12 @@ class CatRepository(private val catDao: CatDao) {
         }
     }
 
+    fun updateCat(cat: Cat) {
+        coroutineScope.launch {
+            catDao.update(cat)
+        }
+    }
+
     fun updateCatOwner(catId: Long, ownerId: Long) {
         coroutineScope.launch {
             catDao.updateOwnerById(catId, ownerId)

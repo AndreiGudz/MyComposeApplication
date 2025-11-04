@@ -19,7 +19,7 @@ class CatViewModel(application: Application) : ViewModel() {
     val catsList: LiveData<List<Cat>>
     private val repository: CatRepository
 
-    // Состояние для формы добавления/редактирования
+    var editingCatId by mutableStateOf<Long?>(null)
     var catName by mutableStateOf("")
     var catBreed by mutableStateOf("")
     var catAge by mutableStateOf("")
@@ -67,7 +67,6 @@ class CatViewModel(application: Application) : ViewModel() {
             )
         )
 
-        // Очистка формы после добавления
         clearForm()
     }
 
@@ -86,13 +85,28 @@ class CatViewModel(application: Application) : ViewModel() {
             likeCatnip = likeCatnip
         )
 
-        // Очистка формы после обновления
-        clearForm()
+        updateCatOwner(id)
+
+        cancelEditing()
     }
 
     fun updateCatOwner(catId: Long) {
         val ownerId = catOwnerId.toLongOrNull() ?: return
         repository.updateCatOwner(catId, ownerId)
+    }
+
+    fun startEditing(cat: Cat) {
+        editingCatId = cat.id
+        catName = cat.name
+        catBreed = cat.breed
+        catAge = cat.age.toString()
+        likeCatnip = cat.likeCatnip
+        catOwnerId = cat.ownerId?.toString() ?: ""
+    }
+
+    fun cancelEditing() {
+        editingCatId = null
+        clearForm()
     }
 
     private fun clearForm() {

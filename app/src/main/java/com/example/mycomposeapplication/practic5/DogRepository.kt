@@ -28,6 +28,12 @@ class DogRepository(private val dogDao: DogDao) {
         }
     }
 
+    fun updateDog(dog: Dog) {
+        coroutineScope.launch {
+            dogDao.update(dog)
+        }
+    }
+
     fun updateDogOwner(dogId: Long, ownerId: Long) {
         coroutineScope.launch {
             dogDao.updateOwnerById(dogId, ownerId)

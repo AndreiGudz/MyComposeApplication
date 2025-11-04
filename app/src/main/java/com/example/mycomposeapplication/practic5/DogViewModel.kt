@@ -19,13 +19,15 @@ class DogViewModel(application: Application) : ViewModel() {
     val dogsList: LiveData<List<Dog>>
     private val repository: DogRepository
 
-    // Состояние для формы добавления/редактирования
+    var editingDogId by mutableStateOf<Long?>(null)
     var dogName by mutableStateOf("")
     var dogBreed by mutableStateOf("")
     var dogAge by mutableStateOf("")
     var dogSize by mutableStateOf("")
     var isTrained by mutableStateOf(false)
     var dogOwnerId by mutableStateOf("")
+
+    val sizeValues = listOf("Small", "Medium", "Large")
 
     init {
         val myDb = MyDatabase.getInstance(application)
@@ -73,7 +75,6 @@ class DogViewModel(application: Application) : ViewModel() {
             )
         )
 
-        // Очистка формы после добавления
         clearForm()
     }
 
@@ -83,6 +84,8 @@ class DogViewModel(application: Application) : ViewModel() {
 
     fun updateDog(id: Long) {
         val age = dogAge.toIntOrNull() ?: 0
+        if (!sizeValues.contains(dogSize))
+            dogSize = ""
 
         repository.updateDog(
             id = id,
@@ -93,13 +96,29 @@ class DogViewModel(application: Application) : ViewModel() {
             isTrained = isTrained
         )
 
-        // Очистка формы после обновления
-        clearForm()
+        updateDogOwner(id)
+
+        cancelEditing()
     }
 
     fun updateDogOwner(dogId: Long) {
         val ownerId = dogOwnerId.toLongOrNull() ?: return
         repository.updateDogOwner(dogId, ownerId)
+    }
+
+    fun startEditing(dog: Dog) {
+        editingDogId = dog.id
+        dogName = dog.name
+        dogBreed = dog.breed
+        dogAge = dog.age.toString()
+        dogSize = dog.size
+        isTrained = dog.isTrained
+        dogOwnerId = dog.ownerId?.toString() ?: ""
+    }
+
+    fun cancelEditing() {
+        editingDogId = null
+        clearForm()
     }
 
     private fun clearForm() {

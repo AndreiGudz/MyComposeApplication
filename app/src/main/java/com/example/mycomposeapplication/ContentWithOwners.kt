@@ -1,107 +1,95 @@
 package com.example.mycomposeapplication
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mycomposeapplication.practic5.Owner
 import com.example.mycomposeapplication.practic5.OwnerViewModel
 
 @Composable
-fun ContentWithOwners(vm: OwnerViewModel = viewModel()) {
+fun ContentWithOwners(vm: OwnerViewModel) {
     val ownerList by vm.ownersList.observeAsState(listOf())
 
     Column {
-        OutlinedTextField(
-            vm.ownerName,
-            modifier = Modifier.padding(8.dp).fillMaxWidth(),
-            label = { Text("Name") },
-            onValueChange = { vm.changeName(it) }
+        CommonTextField(
+            value = vm.ownerName,
+            onValueChange = { vm.changeName(it) },
+            label = "Name"
         )
 
-        OutlinedTextField(
-            vm.ownerPhone,
-            modifier = Modifier.padding(8.dp).fillMaxWidth(),
-            label = { Text("Phone") },
+        CommonTextField(
+            value = vm.ownerPhone,
             onValueChange = { vm.changePhone(it) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+            label = "Phone",
+            keyboardType = KeyboardType.Phone
         )
 
-        OutlinedTextField(
-            vm.ownerEmail,
-            modifier = Modifier.padding(8.dp).fillMaxWidth(),
-            label = { Text("Email") },
+        CommonTextField(
+            value = vm.ownerEmail,
             onValueChange = { vm.changeEmail(it) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            label = "Email",
+            keyboardType = KeyboardType.Email
         )
 
-        Button(
-            { vm.addOwner() },
-            Modifier.padding(8.dp)
-        ) {
-            Text("Add new owner", fontSize = 22.sp)
-        }
+        CommonActionButtons(
+            isEditing = vm.editingOwnerId != null,
+            onUpdate = { vm.editingOwnerId?.let { id -> vm.updateOwner(id) } },
+            onCancel = { vm.cancelEditing() },
+            onAdd = { vm.addOwner() },
+            updateText = "Update Owner",
+            addText = "Add new owner"
+        )
 
         OwnerList(
             owners = ownerList,
+            onEdit = { vm.startEditing(it) },
             delete = { vm.deleteOwner(it) }
         )
     }
 }
 
 @Composable
-fun OwnerList(owners:List<Owner>, delete:(Long)->Unit) {
-    LazyColumn(Modifier.fillMaxWidth()) {
-        item {
-            OwnerTitleRow()
-        }
-        items(owners) {
-                owner -> OwnerRow(owner) { delete(owner.id) }
-        }
-    }
-}
+fun OwnerList(owners: List<Owner>, onEdit: (Owner) -> Unit, delete: (Long) -> Unit) {
+    val ownerColumns = listOf(
+        ColumnConfig("Id", 1f, 16.sp),
+        ColumnConfig("Name", 3f, 16.sp),
+        ColumnConfig("Phone", 3f, 16.sp),
+        ColumnConfig("Email", 4f, 16.sp),
+        ColumnConfig("Edit", 2f, 16.sp),
+        ColumnConfig("Delete", 2f, 16.sp)
+    )
 
-@Composable
-fun OwnerRow(owner:Owner, delete:(Long)->Unit) {
-    Row(Modifier.fillMaxWidth().padding(5.dp).background(Color.White)) {
-        Text(owner.id.toString(), Modifier.weight(0.1f), fontSize = 22.sp)
-        Text(owner.name, Modifier.weight(0.2f), fontSize = 22.sp)
-        Text(owner.phone, Modifier.weight(0.2f), fontSize = 22.sp)
-        Text(owner.email, Modifier.weight(0.2f), fontSize = 22.sp)
-        Text("Delete",
-            Modifier.weight(0.2f).clickable { delete(owner.id) },
-            color = Color(0xFF6650a4), fontSize = 22.sp)
-    }
-}
-@Composable
-fun OwnerTitleRow() {
-    Row(Modifier.background(Color.LightGray).fillMaxWidth().padding(5.dp)) {
-        Text("Id", color = Color.White,
-            modifier = Modifier.weight(0.1f), fontSize = 22.sp)
-        Text("Name", color = Color.White,
-            modifier = Modifier.weight(0.2f), fontSize = 22.sp)
-        Text("Phone", color = Color.White,
-            modifier = Modifier.weight(0.2f), fontSize = 22.sp)
-        Text("Email", color = Color.White,
-            modifier = Modifier.weight(0.2f), fontSize = 22.sp)
-        Text("Delete",
-            modifier = Modifier.weight(0.2f), fontSize = 22.sp)
-    }
+    CommonList(
+        items = owners,
+        titleRow = { CommonTitleRow(columns = ownerColumns) },
+        itemRow = { owner ->
+            val ownerData = listOf(
+                ColumnData(owner.id.toString(), 1f, 16.sp),
+                ColumnData(owner.name, 3f, 16.sp),
+                ColumnData(owner.phone, 3f, 16.sp),
+                ColumnData(owner.email, 4f, 16.sp),
+                ColumnData(
+                    text = "Edit",
+                    weight = 2f,
+                    fontSize = 16.sp,
+                    isClickable = true,
+                    color = Color(0xFF2196F3),
+                    onClick = { onEdit(owner) }
+                ),
+                ColumnData(
+                    text = "Delete",
+                    weight = 2f,
+                    fontSize = 16.sp,
+                    isClickable = true,
+                    color = Color(0xFFF44336),
+                    onClick = { delete(owner.id) }
+                )
+            )
+            CommonItemRow(columns = ownerData)
+        }
+    )
 }

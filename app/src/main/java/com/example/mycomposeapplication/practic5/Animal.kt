@@ -20,13 +20,13 @@ abstract class Animal(
 
 @Entity(
     tableName = "cats",
-//    foreignKeys = [ForeignKey(
-//        entity = Owner::class,
-//        parentColumns = ["id"],
-//        childColumns = ["ownerId"],
-//        onDelete = SET_NULL,
-//        onUpdate = CASCADE)
-//    ]
+    foreignKeys = [ForeignKey(
+        entity = Owner::class,
+        parentColumns = ["id"],
+        childColumns = ["ownerId"],
+        onDelete = SET_NULL,
+        onUpdate = CASCADE)
+    ]
 )
 data class Cat(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -46,13 +46,13 @@ data class Cat(
 
 @Entity(
     tableName = "dogs",
-//    foreignKeys = [ForeignKey(
-//        entity = Owner::class,
-//        parentColumns = ["id"],
-//        childColumns = ["ownerId"],
-//        onDelete = SET_NULL,
-//        onUpdate = CASCADE)
-//    ]
+    foreignKeys = [ForeignKey(
+        entity = Owner::class,
+        parentColumns = ["id"],
+        childColumns = ["ownerId"],
+        onDelete = SET_NULL,
+        onUpdate = CASCADE)
+    ]
 )
 data class Dog(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

@@ -1,6 +1,5 @@
 package com.example.mycomposeapplication
 
-import org.intellij.lang.annotations.Language
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -21,7 +20,7 @@ interface WeatherApiService {
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
         @Query("hourly") hourly: String = "temperature_2m,weather_code",
-        @Query("current") curent: String = "temperature_2m,weather_code",
+        @Query("current") current: String = "temperature_2m,weather_code",
         @Query("timezone") timezone: String = "auto"
     ): WeatherResponse
 }

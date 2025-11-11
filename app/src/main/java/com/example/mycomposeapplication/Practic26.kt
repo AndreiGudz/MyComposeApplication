@@ -22,8 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Practic26() {
-    var searchWord by remember { mutableStateOf("программир") }
+fun Practic26(searchWordByDefault:String = "программ") {
+    var searchWord by remember { mutableStateOf(searchWordByDefault) }
     var result by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
 

@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -20,19 +21,19 @@ import androidx.core.app.NotificationCompat
 import com.example.mycomposeapplication.ui.theme.MyComposeApplicationTheme
 
 /**
- * Практическая работа №31.
- * Тема: Базовая работа с оповещениями
- * 1. Создать оповещение с иконкой, заголовком, и текстом;
- * 2. Создать оповещение, которое открывает приложение;
- * 3. Создать оповещение, которое отправляет команду в сервис на выполнение;
- * 4 Добавить несколько каналов оповещений с индивидуальными настройками;
- * 5. Добавить оповещения на экран блокировки.
+ * Практическая работа №32.
+ * Тема: Оповещения с действиями.
+ * 1. Добавить к оповещению кнопку;
+ * 2. Добавить к оповещению поле для ввода текста;
+ * 3. Добавить к оповещению уникальную вибрацию;
+ * 4. Добавить возможность открыть приложение из оповещения из экрана блокировки.
  */
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         if (ActivityCompat.checkSelfPermission(
                 this,

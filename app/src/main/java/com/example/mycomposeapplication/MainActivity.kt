@@ -26,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.example.mycomposeapplication.ui.theme.MyComposeApplicationTheme
 import java.io.File
@@ -123,7 +122,6 @@ class MainActivity : ComponentActivity() {
             ".jpg",         /* suffix */
             storageDir      /* directory */
         )
-
 
         return androidx.core.content.FileProvider.getUriForFile(
             context,

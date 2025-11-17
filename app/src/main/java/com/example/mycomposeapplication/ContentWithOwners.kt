@@ -1,9 +1,12 @@
 package com.example.mycomposeapplication
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
@@ -13,8 +16,9 @@ import com.example.mycomposeapplication.practic5.OwnerViewModel
 @Composable
 fun ContentWithOwners(vm: OwnerViewModel) {
     val ownerList by vm.ownersList.observeAsState(listOf())
+    val scrollState = rememberScrollState()
 
-    Column {
+    Column(Modifier.verticalScroll(scrollState)) {
         CommonTextField(
             value = vm.ownerName,
             onValueChange = { vm.changeName(it) },

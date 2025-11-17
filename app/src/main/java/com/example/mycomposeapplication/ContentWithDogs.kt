@@ -1,9 +1,12 @@
 package com.example.mycomposeapplication
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.mycomposeapplication.practic5.Dog
@@ -12,8 +15,9 @@ import com.example.mycomposeapplication.practic5.DogViewModel
 @Composable
 fun ContentWithDogs(vm: DogViewModel) {
     val dogList by vm.dogsList.observeAsState(listOf())
+    val scrollState = rememberScrollState()
 
-    Column {
+    Column(Modifier.verticalScroll(scrollState)) {
         // Форма добавления/редактирования собаки
         CommonTextField(
             value = vm.dogName,

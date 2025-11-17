@@ -114,7 +114,7 @@ fun <T> CommonList(
     itemRow: @Composable (T) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(modifier.fillMaxWidth()) {
+    LazyColumn(modifier.fillMaxWidth().heightIn(max = 500.dp)) {
         item { titleRow() }
         items(items) { item -> itemRow(item) }
     }

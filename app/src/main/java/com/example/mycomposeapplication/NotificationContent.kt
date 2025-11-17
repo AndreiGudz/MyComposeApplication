@@ -88,28 +88,33 @@ fun showNotificationWithAction(context: android.content.Context) {
 
 @SuppressLint("MissingPermission")
 fun showNotificationWithInputAndVibrate(context: android.content.Context) {
-    val remoteInput: RemoteInput? = RemoteInput.Builder(ReplyReceiver.KEY_TEXT_REPLY)
+    // Создаем RemoteInput
+    val remoteInput = RemoteInput.Builder(ReplyReceiver.KEY_TEXT_REPLY)
         .setLabel("Введите ваш ответ...")
         .build()
 
+    // Intent для BroadcastReceiver
     val intentReply = Intent(context, ReplyReceiver::class.java).apply {
         putExtra(NOTIFICATION_ID, 2)
     }
 
+    // PendingIntent для ответа
     val pendingIntentReply = PendingIntent.getBroadcast(
         context,
         2,
         intentReply,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
     )
 
-    val action: NotificationCompat.Action = NotificationCompat.Action.Builder(
+    // Создаем действие с RemoteInput
+    val action = NotificationCompat.Action.Builder(
         android.R.drawable.ic_dialog_email,
         "Ответить",
         pendingIntentReply
     ).addRemoteInput(remoteInput)
         .build()
 
+    // Создаем уведомление
     val notification = NotificationCompat.Builder(context, MainActivity.TASK_3)
         .setSmallIcon(android.R.drawable.ic_dialog_email)
         .setContentTitle("Ввести текст")
@@ -119,6 +124,7 @@ fun showNotificationWithInputAndVibrate(context: android.content.Context) {
         .addAction(action)
         .build()
 
+    // Показываем уведомление
     with(NotificationManagerCompat.from(context)) {
         notify(2, notification)
     }

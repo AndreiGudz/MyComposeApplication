@@ -28,8 +28,9 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".ReplyReceiver"
-            android:exported="false">
-        </receiver>
+        <receiver
+            android:name=".ReplyReceiver"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 </manifest>

@@ -16,19 +16,24 @@ import kotlinx.coroutines.launch
 
 class ReplyReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val remoteInput = RemoteInput.getResultsFromIntent(intent)
-        val repliedText = remoteInput?.getString(KEY_TEXT_REPLY) ?: "Текст не дошёл"
-        val notificationId = intent.getIntExtra("notification_id", -1)
+        // Получаем текст ответа из RemoteInput
+        val repliedText = getReplyText(intent) ?: "Текст не дошёл"
+        val notificationId = intent.getIntExtra(NOTIFICATION_ID, -1)
 
-        Log.d("ReplyReceiver", "${context.packageName} - ${intent.dataString}")
-        Log.d("ReplyReceiver", "remoteInput $remoteInput\n" +
-                "repliedText $repliedText\n" +
-                "notificationId $notificationId")
+        Log.d("ReplyReceiver", "Ответ получен: $repliedText")
+        Log.d("ReplyReceiver", "ID уведомления: $notificationId")
 
+        // Показываем Toast с ответом
         Toast.makeText(context, "Ответ: $repliedText", Toast.LENGTH_LONG).show()
 
-        if (notificationId != -1)
+        // Закрываем уведомление
+        if (notificationId != -1) {
             NotificationManagerCompat.from(context).cancel(notificationId)
+        }
+    }
+
+    private fun getReplyText(intent: Intent): String? {
+        return RemoteInput.getResultsFromIntent(intent)?.getCharSequence(KEY_TEXT_REPLY)?.toString()
     }
 
     companion object {

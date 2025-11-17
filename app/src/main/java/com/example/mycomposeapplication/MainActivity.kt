@@ -107,9 +107,9 @@ class MainActivity : ComponentActivity() {
         val notificationManager = getSystemService(NotificationManager::class.java)
 //        channels.forEach {
 //            notificationManager.deleteNotificationChannel(it.name as String?)
-//
 //        }
-        notificationManager.createNotificationChannels(channels)
+        if (!notificationManager.notificationChannels.containsAll(channels))
+            notificationManager.createNotificationChannels(channels)
     }
 
     companion object {

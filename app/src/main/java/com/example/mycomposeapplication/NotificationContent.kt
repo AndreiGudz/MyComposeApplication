@@ -2,7 +2,9 @@ package com.example.mycomposeapplication
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -18,6 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun NotificationContent() {
@@ -30,12 +42,8 @@ fun NotificationContent() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Тест уведомлений",
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
+        Text(text = "Тест уведомлений")
 
-        // Пункт 1: Кнопка для базового уведомления
         MyButton("1. Добавить к оповещению кнопку;") {
             showNotificationWithAction(context)
         }
@@ -44,17 +52,23 @@ fun NotificationContent() {
             showNotificationWithInputAndVibrate(context)
         }
 
-
+        MyButton("4. Открыть приложение из оповещения из экрана блокировки.") {
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(3000)
+                showFullScreenNotification(context)
+            }
+        }
     }
 }
 
 @SuppressLint("MissingPermission")
 fun showNotificationWithAction(context: android.content.Context) {
     val intent = Intent(context, MainActivity::class.java).apply {
+        putExtra("notification_id", 1)
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     }
 
-    val pendingIntent = PendingIntent.getActivity(context,0,intent,
+    val pendingIntent = PendingIntent.getActivity(context,1,intent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
@@ -78,10 +92,13 @@ fun showNotificationWithInputAndVibrate(context: android.content.Context) {
         .setLabel("Введите ваш ответ...")
         .build()
 
-    val intentReply = Intent(context, ReplyReceiver::class.java)
+    val intentReply = Intent(context, ReplyReceiver::class.java).apply {
+        putExtra(NOTIFICATION_ID, 2)
+    }
+
     val pendingIntentReply = PendingIntent.getBroadcast(
         context,
-        1,
+        2,
         intentReply,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
@@ -109,10 +126,12 @@ fun showNotificationWithInputAndVibrate(context: android.content.Context) {
 
 @SuppressLint("MissingPermission")
 private fun showFullScreenNotification(context: android.content.Context) {
-    val fullScreenIntent = Intent(context, MainActivity::class.java)
+    val fullScreenIntent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
     val fullScreenPendingIntent = PendingIntent.getActivity(
         context,
-        2,
+        3,
         fullScreenIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
@@ -122,9 +141,12 @@ private fun showFullScreenNotification(context: android.content.Context) {
         .setContentText("Тапните, чтобы открыть приложение")
         .setSmallIcon(android.R.drawable.ic_dialog_alert)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setContentIntent(fullScreenPendingIntent)
         .setFullScreenIntent(fullScreenPendingIntent, true)
         .setCategory(NotificationCompat.CATEGORY_ALARM)
+        .setAutoCancel(true)
         .build()
+
 
     with(NotificationManagerCompat.from(context)) {
         notify(3, notification)

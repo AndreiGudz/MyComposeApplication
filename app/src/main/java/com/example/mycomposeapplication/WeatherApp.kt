@@ -11,14 +11,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,123 +27,139 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun WeatherApp(viewModel: WeatherViewModel = viewModel()) {
-    var cityInput by remember { mutableStateOf("") }
-    val uiState by viewModel.uiState.collectAsState()
+fun WeatherApp() {
+    val context = LocalContext.current
+    val weatherViewModel: WeatherViewModel = viewModel()
+    val filesViewModel: FilesViewModel = viewModel()
+    var cityName by remember { mutableStateOf("") }
+    val weatherState by weatherViewModel.uiState.collectAsState()
+    val fileContents by filesViewModel.fileContents.collectAsState()
+    val savedWeatherData by filesViewModel.savedWeatherData.collectAsState()
+
+    // Инициализация fileManager при первом запуске
+    LaunchedEffect(Unit) {
+        filesViewModel.setFileManager(context)
+        filesViewModel.loadSavedWeatherData()
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Поле поиска
+        // Поиск погоды
+        TextField(
+            value = cityName,
+            onValueChange = { cityName = it },
+            label = { Text("Введите город") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                weatherViewModel.searchWeather(cityName)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = cityName.isNotBlank()
+        ) {
+            Text("Получить погоду")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Кнопки для работы с файлами
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            OutlinedTextField(
-                value = cityInput,
-                onValueChange = { cityInput = it },
-                label = { Text("Название города") },
-                modifier = Modifier.weight(1f),
-                singleLine = true
-            )
+            Button(onClick = {
+                filesViewModel.createFilesAndStructure()
+            }) {
+                Text("Создать файлы")
+            }
 
-            Button(
-                onClick = { viewModel.searchWeather(cityInput) },
-                enabled = cityInput.isNotBlank()
-            ) {
-                Text("Найти")
+            Button(onClick = {
+                filesViewModel.scanAndDisplayFiles()
+            }) {
+                Text("Сканировать")
+            }
+
+            // Пункт 7: Кнопка "Очистить"
+            Button(onClick = {
+                filesViewModel.clearJsonFiles()
+            }) {
+                Text("Очистить JSON")
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Отображение состояния
-        when (val state = uiState) {
-            is WeatherUiState.Empty -> {
-                PlaceholderText("Введите город для поиска погоды")
-            }
+        // Отображение текущей погоды
+        when (weatherState) {
             is WeatherUiState.Loading -> {
-                LoadingIndicator()
-            }
-            is WeatherUiState.Error -> {
-                ErrorMessage(state.message)
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
             is WeatherUiState.Success -> {
-                WeatherContent(state.location, state.weather)
-            }
-        }
-    }
-}
-
-@Composable
-fun WeatherContent(location: Location, weather: WeatherResponse) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            CurrentWeatherCard(location, weather)
-        }
-
-        item {
-            Text(
-                "Ближайшие часы:",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        if (weather.hourly != null)
-            itemsIndexed(weather.hourly.time.take(30)) { index, time ->
-                HourlyWeatherItem(
-                    time = time,
-                    temperature = weather.hourly.temperature_2m[index],
-                    weatherCode = weather.hourly.weather_code[index]
+                val successState = weatherState as WeatherUiState.Success
+                WeatherCard(
+                    location = successState.location,
+                    weather = successState.weather,
+                    onSave = {
+                        // Пункт 5: Сохраняем результат запроса в JSON
+                        filesViewModel.addToSavedWeatherData(successState.weather)
+                        filesViewModel.saveWeatherResponsesToJson(
+                            filesViewModel.savedWeatherData.value + successState.weather
+                        )
+                    }
                 )
             }
-        else {
-            item {
-                Text("Погода на ближайшие часы не найдена")
-            }
-        }
-    }
-}
-
-@Composable
-fun CurrentWeatherCard(location: Location, weather: WeatherResponse) {
-    Card {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                "${location.name}, ${location.country}",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            is WeatherUiState.Error -> {
                 Text(
-                    WeatherUtils.getWeatherIcon(weather.current.weather_code),
-                    style = MaterialTheme.typography.headlineLarge
+                    text = (weatherState as WeatherUiState.Error).message,
+                    color = MaterialTheme.colorScheme.error
                 )
+            }
+            else -> {}
+        }
 
-                Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-                Column {
-                    Text(
-                        "${weather.current.temperature_2m}°C",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(WeatherUtils.getWeatherDescription(weather.current.weather_code))
+        // Пункт 4: Отображение содержимого файлов
+        if (fileContents.isNotEmpty()) {
+            Text("Содержимое файлов:", fontWeight = FontWeight.Bold)
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(fileContents) { fileContent ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp)
+                    ) {
+                        Text(
+                            text = fileContent,
+                            modifier = Modifier.padding(8.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+        }
+
+        // Пункт 6: Отображение сохраненных JSON данных
+        if (savedWeatherData.isNotEmpty()) {
+            Text("Сохраненные данные погоды:", fontWeight = FontWeight.Bold)
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(savedWeatherData) { weatherData ->
+                    SavedWeatherCard(weatherData)
                 }
             }
         }
@@ -150,52 +167,75 @@ fun CurrentWeatherCard(location: Location, weather: WeatherResponse) {
 }
 
 @Composable
-fun HourlyWeatherItem(time: String, temperature: Double, weatherCode: Int) {
-    Card {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(WeatherUtils.formatTime(time))
-            Text(WeatherUtils.getWeatherIcon(weatherCode))
-            Text("${temperature}°C", fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-@Composable
-fun LoadingIndicator() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+fun WeatherCard(
+    location: Location,
+    weather: WeatherResponse,
+    onSave: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
     ) {
-        CircularProgressIndicator()
-    }
-}
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "${location.name}, ${location.country}",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = WeatherUtils.getWeatherIcon(weather.current.weather_code),
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            }
 
-@Composable
-fun ErrorMessage(message: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("❌", style = MaterialTheme.typography.headlineMedium)
+            Text(
+                text = "Температура: ${weather.current.temperature_2m}°C",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Text(
+                text = WeatherUtils.getWeatherDescription(weather.current.weather_code),
+                style = MaterialTheme.typography.bodyMedium
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
-            Text(message)
+
+            Button(onClick = onSave) {
+                Text("Сохранить в JSON")
+            }
         }
     }
 }
 
 @Composable
-fun PlaceholderText(text: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+fun SavedWeatherCard(weatherData: WeatherResponse) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
     ) {
-        Text(text)
+        Column(modifier = Modifier.padding(8.dp)) {
+            Text(
+                text = "Широта: ${weatherData.latitude}, Долгота: ${weatherData.longitude}",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "Температура: ${weatherData.current.temperature_2m}°C",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "Погода: ${WeatherUtils.getWeatherDescription(weatherData.current.weather_code)}",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "Время: ${weatherData.current.time}",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
     }
 }

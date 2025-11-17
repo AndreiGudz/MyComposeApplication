@@ -41,7 +41,7 @@ fun MyContent() {
     MyComposeApplicationTheme {
         Scaffold( modifier = Modifier.fillMaxSize() ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
-
+                WeatherApp()
             }
         }
     }

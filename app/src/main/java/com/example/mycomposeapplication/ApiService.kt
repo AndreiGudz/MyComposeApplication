@@ -19,7 +19,7 @@ interface WeatherApiService {
     suspend fun getWeather(
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
-        @Query("hourly") hourly: String = "temperature_2m,weather_code",
+//        @Query("hourly") hourly: String = "temperature_2m,weather_code",
         @Query("current") current: String = "temperature_2m,weather_code",
         @Query("timezone") timezone: String = "auto"
     ): WeatherResponse

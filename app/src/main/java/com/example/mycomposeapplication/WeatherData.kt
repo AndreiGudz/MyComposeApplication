@@ -10,7 +10,7 @@ data class WeatherResponse(
     val longitude: Double,
     val timezone: String,
     val current: CurrentWeather,
-    val hourly: HourlyWeather?
+//    val hourly: HourlyWeather?
 )
 
 data class CurrentWeather(
@@ -19,11 +19,11 @@ data class CurrentWeather(
     val time: String
 )
 
-data class HourlyWeather(
-    val time: List<String>,
-    val weather_code: List<Int>,
-    val temperature_2m: List<Double>
-)
+//data class HourlyWeather(
+//    val time: List<String>,
+//    val weather_code: List<Int>,
+//    val temperature_2m: List<Double>
+//)
 
 data class GeocodingResponse(
     val results: List<Location>

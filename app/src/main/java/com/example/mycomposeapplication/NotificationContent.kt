@@ -1,10 +1,8 @@
 package com.example.mycomposeapplication
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,10 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.RemoteInput
 
 @Composable
 fun NotificationContent() {
@@ -38,46 +36,20 @@ fun NotificationContent() {
         )
 
         // Пункт 1: Кнопка для базового уведомления
-        MyButton("1. Базовое уведомление") {
-            showBasicNotification(context)
+        MyButton("1. Добавить к оповещению кнопку;") {
+            showNotificationWithAction(context)
         }
 
-        // Пункт 2: Кнопка для уведомления, открывающего приложение
-        MyButton("2. Открыть приложение") {
-            showAppOpeningNotification(context)
+        MyButton("2-3. Уведомление с вводом текста и уведомлением") {
+            showNotificationWithInputAndVibrate(context)
         }
 
-        // Пункт 3: Кнопка для уведомления с действием
-        MyButton("3. Уведомление с действием") {
-            showServiceNotification(context)
-        }
 
-        // Пункт 5: Кнопка для уведомления на экране блокировки
-        MyButton("5. На экран блокировки") {
-            showLockScreenNotification(context)
-        }
     }
 }
 
-// Пункт 1: Функция для создания базового уведомления
 @SuppressLint("MissingPermission")
-fun showBasicNotification(context: android.content.Context) {
-    val notification = NotificationCompat.Builder(context, MainActivity.BASIC_CHANNEL)
-        .setSmallIcon(android.R.drawable.ic_dialog_info)
-        .setContentTitle("Простое уведомление")
-        .setContentText("Это тестовое уведомление")
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setAutoCancel(true)
-        .build()
-
-    with(NotificationManagerCompat.from(context)) {
-        notify(1, notification)
-    }
-}
-
-// Пункт 2: Функция для уведомления, открывающего приложение
-@SuppressLint("MissingPermission")
-fun showAppOpeningNotification(context: android.content.Context) {
+fun showNotificationWithAction(context: android.content.Context) {
     val intent = Intent(context, MainActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     }
@@ -86,13 +58,48 @@ fun showAppOpeningNotification(context: android.content.Context) {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
-    val notification = NotificationCompat.Builder(context, MainActivity.APP_CHANNEL)
-        .setSmallIcon(android.R.drawable.ic_dialog_alert)
-        .setContentTitle("Открыть приложение")
-        .setContentText("Нажмите, чтобы открыть приложение")
-        .setContentIntent(pendingIntent)
+    val notification = NotificationCompat.Builder(context, MainActivity.TASK_1)
+        .setSmallIcon(android.R.drawable.ic_dialog_info)
+        .setContentTitle("Уведомление с действием")
+        .setContentText("Это уведомление с действием открывающим приложение")
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setAutoCancel(true)
+        .addAction(android.R.drawable.star_on, "Открыть", pendingIntent)
+        .build()
+
+    with(NotificationManagerCompat.from(context)) {
+        notify(1, notification)
+    }
+}
+
+@SuppressLint("MissingPermission")
+fun showNotificationWithInputAndVibrate(context: android.content.Context) {
+    val remoteInput: RemoteInput? = RemoteInput.Builder(ReplyReceiver.KEY_TEXT_REPLY)
+        .setLabel("Введите ваш ответ...")
+        .build()
+
+    val intentReply = Intent(context, ReplyReceiver::class.java)
+    val pendingIntentReply = PendingIntent.getBroadcast(
+        context,
+        1,
+        intentReply,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val action: NotificationCompat.Action = NotificationCompat.Action.Builder(
+        android.R.drawable.ic_dialog_email,
+        "Ответить",
+        pendingIntentReply
+    ).addRemoteInput(remoteInput)
+        .build()
+
+    val notification = NotificationCompat.Builder(context, MainActivity.TASK_3)
+        .setSmallIcon(android.R.drawable.ic_dialog_email)
+        .setContentTitle("Ввести текст")
+        .setContentText("Введите текст и он появится снизу")
         .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setAutoCancel(true)
+        .addAction(action)
         .build()
 
     with(NotificationManagerCompat.from(context)) {
@@ -100,33 +107,23 @@ fun showAppOpeningNotification(context: android.content.Context) {
     }
 }
 
-// Пункт 3: Функция для уведомления с действием
 @SuppressLint("MissingPermission")
-fun showServiceNotification(context: android.content.Context) {
-    val startTaskIntent  = Intent(context, NotificationService::class.java).apply {
-        action = NotificationService.ACTION_START_TASK
-    }
-
-    val startTaskPendingIntent = PendingIntent.getService(context, 0, startTaskIntent ,
+private fun showFullScreenNotification(context: android.content.Context) {
+    val fullScreenIntent = Intent(context, MainActivity::class.java)
+    val fullScreenPendingIntent = PendingIntent.getActivity(
+        context,
+        2,
+        fullScreenIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
-    val cancelTaskIntent = Intent(context, NotificationService::class.java).apply {
-        action = NotificationService.ACTION_CANCEL_TASK
-    }
-
-    val cancelTaskPendingIntent = PendingIntent.getService(context,1, cancelTaskIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-
-    val notification = NotificationCompat.Builder(context, MainActivity.SERVICE_CHANNEL)
-        .setSmallIcon(android.R.drawable.ic_media_play)
-        .setContentTitle("Выполнить задачу")
-        .setContentText("Нажмите для выполнения фоновой задачи")
+    val notification = NotificationCompat.Builder(context, MainActivity.TASK_4)
+        .setContentTitle("Срочное уведомление!")
+        .setContentText("Тапните, чтобы открыть приложение")
+        .setSmallIcon(android.R.drawable.ic_dialog_alert)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .addAction(android.R.drawable.ic_media_play,"Выполнить", startTaskPendingIntent)
-        .addAction(android.R.drawable.ic_media_pause,"Отменить", cancelTaskPendingIntent)
-        .setAutoCancel(true)
+        .setFullScreenIntent(fullScreenPendingIntent, true)
+        .setCategory(NotificationCompat.CATEGORY_ALARM)
         .build()
 
     with(NotificationManagerCompat.from(context)) {
@@ -134,22 +131,6 @@ fun showServiceNotification(context: android.content.Context) {
     }
 }
 
-// Пункт 5: Функция для уведомления на экране блокировки
-@SuppressLint("MissingPermission")
-fun showLockScreenNotification(context: android.content.Context) {
-    val notification = NotificationCompat.Builder(context, MainActivity.LOCK_SCREEN_CHANNEL)
-        .setSmallIcon(android.R.drawable.ic_lock_lock)
-        .setContentTitle("Уведомление на блокировке")
-        .setContentText("Это видно на заблокированном экране")
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) // Видимо на экране блокировки
-        .setAutoCancel(true)
-        .build()
-
-    with(NotificationManagerCompat.from(context)) {
-        notify(4, notification)
-    }
-}
 
 @Composable
 fun MyButton(text: String, onClick: ()-> Unit) {

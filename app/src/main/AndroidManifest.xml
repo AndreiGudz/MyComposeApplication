@@ -2,10 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Разрешение для камеры -->
     <uses-permission android:name="android.permission.CAMERA" />
-
-    <!-- Указываем, что приложение требует камеру -->
     <uses-feature android:name="android.hardware.camera" android:required="true" />
 
     <application
@@ -25,11 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- Провайдер для временных файлов -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.example.mycomposeapplication.fileprovider"
+            android:authorities="com.example.mycomposeapplication.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

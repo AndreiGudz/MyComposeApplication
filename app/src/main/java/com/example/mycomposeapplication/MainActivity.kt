@@ -3,47 +3,49 @@ package com.example.mycomposeapplication
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.mycomposeapplication.ui.theme.MyComposeApplicationTheme
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
 
-
+/**
+ * Практическая работа №30
+ * Тема: Реактивные объекты
+ * Продемонстрировать особенности работы следующих классов:
+ * 1. Flow;
+ * 2. SharedFlow;
+ * 3. StateFlow;
+ * 4. LiveData;
+ * 5. MutableLiveData;
+ * 6. Channel;
+ * 7. Функция в Android Compose: remember().
+ */
 class MainActivity : ComponentActivity() {
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent { MyContent() }
-    }
-}
-
-@Composable
-fun MyContent() {
-    MyComposeApplicationTheme {
-        Scaffold( modifier = Modifier.fillMaxSize() ) { innerPadding ->
-            Box(modifier = Modifier.padding(innerPadding)) {
-                
-
-
+        setContent {
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    ReactiveObjectsDemo()
+                }
             }
         }
     }
-}
 
-
-@Preview(showBackground = true)
-@Composable
-fun Preview() {
-    MyContent()
 }

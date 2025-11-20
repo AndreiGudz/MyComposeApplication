@@ -16,6 +16,7 @@ import com.example.mycomposeapplication.practic5.CatViewModel
 @Composable
 fun ContentWithCats(vm: CatViewModel) {
     val catList by vm.catsList.observeAsState(listOf())
+    val ownersList by vm.ownersList.observeAsState(listOf())
     val scrollState = rememberScrollState()
 
     Column(Modifier.verticalScroll(scrollState)) {
@@ -38,11 +39,28 @@ fun ContentWithCats(vm: CatViewModel) {
             keyboardType = KeyboardType.Number
         )
 
-        CommonTextField(
-            value = vm.catOwnerId,
-            onValueChange = { vm.changeOwnerId(it) },
-            label = "Owner ID (optional)",
-            keyboardType = KeyboardType.Number
+        CommonDropdown(
+            value = if (vm.catOwnerId.isNotEmpty()) {
+                val ownerId = vm.catOwnerId.toLongOrNull()
+                if (ownerId != null)
+                    vm.getOwnerNameById(ownerId)
+                else
+                    "No Owner"
+            }
+            else
+                "No Owner",
+            onValueChange = { selectedOwnerName ->
+                if (selectedOwnerName == "No Owner") {
+                    vm.changeOwnerId("")
+                } else {
+                    val selectedOwner = ownersList.find { it.name == selectedOwnerName }
+                    selectedOwner?.let { owner ->
+                        vm.changeOwnerId(owner.id.toString())
+                    }
+                }
+            },
+            label = "Owner",
+            options = listOf("No Owner") + ownersList.map { it.name }
         )
 
         CommonSwitch(

@@ -17,8 +17,9 @@ class CatViewModelFactory(val application: Application) : ViewModelProvider.Fact
 class CatViewModel(application: Application) : ViewModel() {
 
     val catsList: LiveData<List<Cat>>
+    val ownersList: LiveData<List<Owner>>
     private val repository: CatRepository
-
+    private val ownerRepository: OwnerRepository
     var editingCatId by mutableStateOf<Long?>(null)
     var catName by mutableStateOf("")
     var catBreed by mutableStateOf("")
@@ -29,8 +30,11 @@ class CatViewModel(application: Application) : ViewModel() {
     init {
         val myDb = MyDatabase.getInstance(application)
         val catDao = myDb.catDao()
+        val ownerDao = myDb.ownerDao()
+        ownerRepository = OwnerRepository(ownerDao)
         repository = CatRepository(catDao)
         catsList = repository.catList
+        ownersList = ownerRepository.ownerList
     }
 
     fun changeName(value: String) {
@@ -115,5 +119,11 @@ class CatViewModel(application: Application) : ViewModel() {
         catAge = ""
         likeCatnip = false
         catOwnerId = ""
+    }
+
+    fun getOwnerNameById(ownerId: Long?): String {
+        if (ownerId == null) return "No Owner"
+        val owners = ownersList.value ?: return "No Owner"
+        return owners.find { it.id == ownerId }?.name ?: "No Owner"
     }
 }

@@ -17,13 +17,15 @@ class DogViewModelFactory(val application: Application) : ViewModelProvider.Fact
 class DogViewModel(application: Application) : ViewModel() {
 
     val dogsList: LiveData<List<Dog>>
+    val ownersList: LiveData<List<Owner>>
     private val repository: DogRepository
+    private val ownerRepository: OwnerRepository
 
     var editingDogId by mutableStateOf<Long?>(null)
     var dogName by mutableStateOf("")
     var dogBreed by mutableStateOf("")
     var dogAge by mutableStateOf("")
-    var dogSize by mutableStateOf("")
+    var dogSize by mutableStateOf("Medium")
     var isTrained by mutableStateOf(false)
     var dogOwnerId by mutableStateOf("")
 
@@ -32,8 +34,11 @@ class DogViewModel(application: Application) : ViewModel() {
     init {
         val myDb = MyDatabase.getInstance(application)
         val dogDao = myDb.dogDao()
+        val ownerDao = myDb.ownerDao()
+        ownerRepository = OwnerRepository(ownerDao)
         repository = DogRepository(dogDao)
         dogsList = repository.dogList
+        ownersList = ownerRepository.ownerList
     }
 
     fun changeName(value: String) {
@@ -128,5 +133,11 @@ class DogViewModel(application: Application) : ViewModel() {
         dogSize = ""
         isTrained = false
         dogOwnerId = ""
+    }
+
+    fun getOwnerNameById(ownerId: Long?): String {
+        if (ownerId == null) return "No Owner"
+        val owners = ownersList.value ?: return "No Owner"
+        return owners.find { it.id == ownerId }?.name ?: "No Owner"
     }
 }

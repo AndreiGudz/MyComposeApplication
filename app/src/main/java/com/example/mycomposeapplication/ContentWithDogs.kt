@@ -15,6 +15,7 @@ import com.example.mycomposeapplication.practic5.DogViewModel
 @Composable
 fun ContentWithDogs(vm: DogViewModel) {
     val dogList by vm.dogsList.observeAsState(listOf())
+    val ownersList by vm.ownersList.observeAsState(listOf())
     val scrollState = rememberScrollState()
 
     Column(Modifier.verticalScroll(scrollState)) {
@@ -38,17 +39,35 @@ fun ContentWithDogs(vm: DogViewModel) {
             keyboardType = KeyboardType.Number
         )
 
-        CommonTextField(
+        CommonDropdown(
             value = vm.dogSize,
             onValueChange = { vm.changeSize(it) },
-            label = "Size (Small/Medium/Large)"
+            label = "Size",
+            options = vm.sizeValues
         )
 
-        CommonTextField(
-            value = vm.dogOwnerId,
-            onValueChange = { vm.changeOwnerId(it) },
-            label = "Owner ID (optional)",
-            keyboardType = KeyboardType.Number
+        CommonDropdown(
+            value = if (vm.dogOwnerId.isNotEmpty()) {
+                val ownerId = vm.dogOwnerId.toLongOrNull()
+                if (ownerId != null)
+                    vm.getOwnerNameById(ownerId)
+                else
+                    "No Owner"
+            }
+            else
+                "No Owner",
+            onValueChange = { selectedOwnerName ->
+                if (selectedOwnerName == "No Owner") {
+                    vm.changeOwnerId("")
+                } else {
+                    val selectedOwner = ownersList.find { it.name == selectedOwnerName }
+                    selectedOwner?.let { owner ->
+                        vm.changeOwnerId(owner.id.toString())
+                    }
+                }
+            },
+            label = "Owner",
+            options = listOf("No Owner") + ownersList.map { it.name }
         )
 
         CommonSwitch(

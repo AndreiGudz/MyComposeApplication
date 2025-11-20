@@ -20,7 +20,10 @@ class OwnerViewModelFactory(val application: Application) :
 class OwnerViewModel(application: Application) : ViewModel() {
 
     val ownersList: LiveData<List<Owner>>
+    val ownersWithAnimals: LiveData<List<OwnerWithAnimals>>
+        get() = repositoryWithAnimals.ownersWithAnimals
     private val repository: OwnerRepository
+    private val repositoryWithAnimals: OwnerWithAnimalsRepository
 
     var editingOwnerId by mutableStateOf<Long?>(null)
     var ownerName by mutableStateOf("")
@@ -32,7 +35,12 @@ class OwnerViewModel(application: Application) : ViewModel() {
         val myDb = MyDatabase.getInstance(application)
         val ownerDao = myDb.ownerDao()
         repository = OwnerRepository(ownerDao)
+        repositoryWithAnimals = OwnerWithAnimalsRepository(ownerDao)
         ownersList = repository.ownerList
+    }
+
+    fun loadOwnersWithAnimals() {
+        repositoryWithAnimals.loadAllOwnersWithAnimals()
     }
 
     fun changeName(value: String){

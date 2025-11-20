@@ -90,13 +90,16 @@ class CatViewModel(application: Application) : ViewModel() {
         )
 
         updateCatOwner(id)
-
         cancelEditing()
     }
 
     fun updateCatOwner(catId: Long) {
-        val ownerId = catOwnerId.toLongOrNull() ?: return
-        repository.updateCatOwner(catId, ownerId)
+        val ownerId = if (catOwnerId.isNotEmpty()) catOwnerId.toLongOrNull() else null
+        if (ownerId != null) {
+            repository.updateCatOwner(catId, ownerId)
+        } else {
+            repository.removeCatOwner(catId)
+        }
     }
 
     fun startEditing(cat: Cat) {

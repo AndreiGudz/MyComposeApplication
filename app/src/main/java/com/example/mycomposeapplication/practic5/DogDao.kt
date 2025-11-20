@@ -32,4 +32,7 @@ interface DogDao {
 
     @Query("UPDATE dogs SET ownerId = :ownerId WHERE id = :dogId")
     fun updateOwnerById(dogId: Long, ownerId: Long)
+
+    @Query("UPDATE dogs SET ownerId = NULL WHERE id = :dogId")
+    fun removeOwnerById(dogId: Long)
 }

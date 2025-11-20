@@ -39,4 +39,10 @@ class CatRepository(private val catDao: CatDao) {
             catDao.updateOwnerById(catId, ownerId)
         }
     }
+
+    fun removeCatOwner(catId: Long) {
+        coroutineScope.launch {
+            catDao.removeOwnerById(catId)
+        }
+    }
 }

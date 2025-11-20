@@ -32,4 +32,7 @@ interface CatDao {
 
     @Query("UPDATE cats SET ownerId = :ownerId WHERE id = :catId")
     fun updateOwnerById(catId: Long, ownerId: Long)
+
+    @Query("UPDATE cats SET ownerId = NULL WHERE id = :catId")
+    fun removeOwnerById(catId: Long)
 }

@@ -107,8 +107,12 @@ class DogViewModel(application: Application) : ViewModel() {
     }
 
     fun updateDogOwner(dogId: Long) {
-        val ownerId = dogOwnerId.toLongOrNull() ?: return
-        repository.updateDogOwner(dogId, ownerId)
+        val ownerId = if (dogOwnerId.isNotEmpty()) dogOwnerId.toLongOrNull() else null
+        if (ownerId != null) {
+            repository.updateDogOwner(dogId, ownerId)
+        } else {
+            repository.removeDogOwner(dogId)
+        }
     }
 
     fun startEditing(dog: Dog) {
